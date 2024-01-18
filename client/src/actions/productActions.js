@@ -1,157 +1,144 @@
+// Importation du module axios pour effectuer des requêtes HTTP
 import axios from "axios";
+
+// Action pour récupérer tous les produits
 export const getAllProducts = () => (dispatch) => {
-  dispatch({ type: "GET_PRODUCTS_REQUEST" });
+  dispatch({ type: "GET_PRODUCTS_REQUEST" }); // Déclencheur de la requête
 
   axios
-    .get("/api/products/getallproducts")
+    .get("/api/products/getallproducts") // Requête GET pour obtenir tous les produits
     .then((res) => {
-      console.log(res);
+      console.log(res); // Affichage de la réponse pour le débogage
 
+      // Dispatch d'une action pour indiquer le succès et envoi des données des produits
       dispatch({ type: "GET_PRODUCTS_SUCCESS", payload: res.data });
     })
     .catch((err) => {
-      console.log(err);
+      console.log(err); // Affichage de l'erreur en cas d'échec
       dispatch({ type: "GET_PRODUCTS_FAILED", payload: err });
     });
 };
 
+// Action pour récupérer un produit par son ID
 export const getProductById = (productid) => (dispatch) => {
-  dispatch({ type: "GET_PRODUCTBYID_REQUEST" });
+  dispatch({ type: "GET_PRODUCTBYID_REQUEST" }); // Déclencheur de la requête
 
   axios
-    .post("/api/products/getproductbyid", { productid })
+    .post("/api/products/getproductbyid", { productid }) // Requête POST pour obtenir un produit par son ID
     .then((res) => {
-      console.log(res);
+      console.log(res); // Affichage de la réponse pour le débogage
 
+      // Dispatch d'une action pour indiquer le succès et envoi des données du produit
       dispatch({ type: "GET_PRODUCTBYID_SUCCESS", payload: res.data });
     })
     .catch((err) => {
-      console.log(err);
+      console.log(err); // Affichage de l'erreur en cas d'échec
       dispatch({ type: "GET_PRODUCTBYID_FAILED", payload: err });
     });
 };
 
+// Action pour filtrer les produits en fonction de la recherche, du tri et de la catégorie
+export const filterProducts = (searchKey, sortKey, category) => (dispatch) => {
+  var filteredproducts;
+  dispatch({ type: 'GET_PRODUCTS_REQUEST' }); // Déclencheur de la requête
 
-export const filterProducts=(searchKey , sortKey , category)=>dispatch=>{
+  axios.get('/api/products/getallproducts').then(res => {
+    filteredproducts = res.data; // Récupération de tous les produits
 
+    // Filtrage par mot-clé de recherche
+    if (searchKey) {
+      filteredproducts = res.data.filter(product => {
+        return product.name.toLowerCase().includes(searchKey);
+      });
+    }
 
-    var filteredproducts ;
-    dispatch({type:'GET_PRODUCTS_REQUEST'})
+    // Tri par prix ou popularité
+    if (sortKey !== 'popular') {
+      if (sortKey === 'htl') {
+        // Tri du plus élevé au plus bas prix
+        filteredproducts = res.data.sort((a, b) => {
+          return -a.price + b.price;
+        });
+      } else {
+        // Tri du plus bas au plus élevé prix
+        filteredproducts = res.data.sort((a, b) => {
+          return a.price - b.price;
+        });
+      }
+    }
 
-    axios.get('/api/products/getallproducts').then(res=>{
+    // Filtrage par catégorie
+    if (category !== 'all') {
+      filteredproducts = res.data.filter(product => {
+        return product.category.toLowerCase().includes(category);
+      });
+    }
 
-        filteredproducts = res.data      
+    // Dispatch d'une action avec les produits filtrés
+    dispatch({ type: 'GET_PRODUCTS_SUCCESS', payload: filteredproducts });
+  }).catch(err => {
+    dispatch({ type: 'GET_PRODUCTS_FAILED' }); // En cas d'échec de la requête
+  });
+};
 
-        if(searchKey)
-        {
-             filteredproducts = res.data.filter(product => {return product.name.toLowerCase().includes(searchKey)})
-        }
+// Action pour ajouter un avis sur un produit
+export const addProductReview = (review, productid) => (dispatch, getState) => {
+  dispatch({ type: 'ADD_PRODUCT_REVIEW_REQUEST' }); // Déclencheur de la requête
 
-        if(sortKey !=='popular')
-        {
-            if(sortKey=='htl')
-            {
-                filteredproducts = res.data.sort((a,b)=>{
-                   
-                    return -a.price + b.price
+  // Récupération de l'utilisateur actuel via le state
+  const currentUser = getState().loginReducer.currentUser;
 
-                })
-            }
-            else{
-                filteredproducts = res.data.sort((a,b)=>{
-                   
-                    return a.price - b.price
+  // Requête POST pour ajouter un avis sur un produit
+  axios.post('/api/products/addreview', { review, productid, currentUser }).then(res => {
+    console.log(res); // Affichage de la réponse pour le débogage
 
-                })
+    // Dispatch d'une action pour indiquer le succès de l'ajout de l'avis
+    dispatch({ type: 'ADD_PRODUCT_REVIEW_SUCCESS' });
+    alert('Votre avis a été soumis avec succès');
+    window.location.reload(); // Rechargement de la page
+  }).catch(err => {
+    dispatch({ type: 'ADD_PRODUCT_REVIEW_FAILED' }); // En cas d'échec de la requête
+  });
+};
 
-            }
-        }
+// Action pour supprimer un produit
+export const deleteProduct = (productid) => (dispatch) => {
+  dispatch({ type: 'DELETE_PRODUCT_REQUEST' }); // Déclencheur de la requête
 
-        if(category!=='all')
-        {
-            filteredproducts = res.data.filter(product =>{return product.category.toLowerCase().includes(category)})
-        }
+  // Requête POST pour supprimer un produit
+  axios.post('/api/products/deleteproduct', { productid }).then(res => {
+    dispatch({ type: 'DELETE_PRODUCT_SUCCESS', payload: res.data }); // Dispatch d'une action en cas de succès
+    alert('Produit supprimé avec succès');
+    window.location.reload(); // Rechargement de la page
+  }).catch(err => {
+    dispatch({ type: 'DELETE_PRODUCT_FAILED', payload: err }); // En cas d'échec de la requête
+  });
+};
 
-        dispatch({type:'GET_PRODUCTS_SUCCESS' , payload : filteredproducts})
+// Action pour ajouter un produit
+export const addProduct = (product) => (dispatch) => {
+  dispatch({ type: 'ADD_PRODUCT_REQUEST' }); // Déclencheur de la requête
 
+  // Requête POST pour ajouter un produit
+  axios.post('/api/products/addproduct', { product }).then(res => {
+    console.log(res); // Affichage de la réponse pour le débogage
+    dispatch({ type: 'ADD_PRODUCT_SUCCESS' }); // Dispatch d'une action en cas de succès
+    window.location.reload(); // Rechargement de la page
+  }).catch(err => {
+    dispatch({ type: 'ADD_PRODUCT_FAILED' }); // En cas d'échec de la requête
+  });
+};
 
+// Action pour mettre à jour un produit
+export const updateProduct = (productid, updatedproduct) => (dispatch) => {
+  dispatch({ type: 'UPDATE_PRODUCT_REQUEST' }); // Déclencheur de la requête
 
-    }).catch(err=>{
-        dispatch({type:'GET_PRODUCTS_FAILED'})
-    })
-
-
-}
-
-
-export const addProductReview = (review , productid)=>(dispatch , getState)=>{
-    
-  dispatch({type:'ADD_PRODUCT_REVIEW_REQUEST'})
-  const currentUser = getState().loginReducer.currentUser
-  axios.post('/api/products/addreview' , {review , productid , currentUser}).then(res=>{
-    console.log(res);
-    dispatch({type:'ADD_PRODUCT_REVIEW_SUCCESS'})
-    alert('Your review submitted successfully')
-    window.location.reload()
-
-  }).catch(err=>{
-    dispatch({type:'ADD_PRODUCT_REVIEW_FAILED'})
-
-  })
-
-
-}
-
-
-export const deleteProduct=(productid)=>dispatch=>{
-
-
-  dispatch({type:'DELETE_PRODUCT_REQUEST'})
-
-  axios.post('/api/products/deleteproduct' , {productid}).then(res=>{
-
-    dispatch({type:'DELETE_PRODUCT_SUCCESS' , payload : res.data})
-    alert('Product deleted successfully')
-    window.location.reload()
-
-
-  }).catch(err=>{
-    dispatch({type:'DELETE_PRODUCT_FAILED' , payload : err})
-
-  })
-
-
-}
-
-
-export const addProduct =(product)=> dispatch=>{
-
-      dispatch({type:'ADD_PRODUCT_REQUEST'})
-
-      axios.post('/api/products/addproduct' , {product}).then(res=>{
-        console.log(res);
-        dispatch({type:'ADD_PRODUCT_SUCCESS'})
-        window.location.reload()
-      }).catch(err=>{
-        dispatch({type:'ADD_PRODUCT_FAILED'})
-
-      })
-
-}
-
-
-export const updateProduct =(productid , updatedproduct)=> dispatch=>{
-
-  dispatch({type:'UPDATE_PRODUCT_REQUEST'})
-
-  axios.post('/api/products/updateproduct' , {productid , updatedproduct}).then(res=>{
-    console.log(res);
-    dispatch({type:'UPDATE_PRODUCT_SUCCESS'})
-    window.location.href='/admin/productslist'
-    
-  }).catch(err=>{
-    dispatch({type:'UPDATE_PRODUCT_FAILED'})
-
-  })
-
-}
+  // Requête POST pour mettre à jour un produit
+  axios.post('/api/products/updateproduct', { productid, updatedproduct }).then(res => {
+    console.log(res); // Affichage de la réponse pour le débogage
+    dispatch({ type: 'UPDATE_PRODUCT_SUCCESS' }); // Dispatch d'une action en cas de succès
+    window.location.href = '/admin/productslist'; // Redirection vers la liste des produits
+  }).catch(err => {
+    dispatch({ type: 'UPDATE_PRODUCT_FAILED' }); // En cas d'échec de la requête
+  });
+};

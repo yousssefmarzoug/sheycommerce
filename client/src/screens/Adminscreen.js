@@ -8,26 +8,21 @@ import Editproduct from './Editproduct'
 import {useSelector , useDispatch} from 'react-redux'
 export default function Adminscreen() {
 
-    const userstate = useSelector(state=>state.loginReducer)
+    //const userstate = useSelector(state=>state.loginReducer)
 
-    const currentUser = userstate.currentUser
-    useEffect(() => {
-
-        if(currentUser)
-        {
-            if(!currentUser.isAdmin){
-
-                window.location.href='/'
-            }
+   // const currentUser = userstate.currentUser
+    /*
+useEffect(() => {
+    if(currentUser) {
+        if(!currentUser.isAdmin) {
+            window.location.href='/';
         }
-        else{
-            window.location.href='/'
+    } else {
+        window.location.href='/';
+    }
+}, []);
+*/
 
-        }
-
-        
-       
-    }, [])
 
 
     return (
