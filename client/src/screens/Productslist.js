@@ -25,8 +25,10 @@ export default function Productslist() {
                     <tr>
                         <th>Name</th>
                         <th>image</th>
-
                         <th>Price</th>
+                        <th>category</th>
+
+                        
                         <th>Stock</th>
                         <th>Id</th>
                         <th>Actions</th>
@@ -42,6 +44,9 @@ export default function Productslist() {
                       <td>{product.name}</td>
                       <td><img src={product.image}  className="img-fluid"/></td>
                       <td>{product.price}</td>
+
+                      <td>{product.category}</td>
+
                       <td>{product.countInStock}</td>
                       <td>{product._id}</td>
                       <td>
