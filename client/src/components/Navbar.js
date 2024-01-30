@@ -1,14 +1,12 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../actions/userActions";
+
 export default function Navbar() {
   const cartreducer = useSelector((state) => state.cartReducer);
-
   const { cartItems } = cartreducer;
-
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   return (
     <div>
@@ -25,37 +23,46 @@ export default function Navbar() {
           aria-expanded="false"
           aria-label="Toggle navigation"
         >
-          <span className="navbar-toggler-icon"><i class="fas fa-bars" style={{color:'white'}}></i></span>
+          <span className="navbar-toggler-icon">
+            <i class="fas fa-bars" style={{ color: "white" }}></i>
+          </span>
         </button>
 
-
-
         <div className="collapse navbar-collapse" id="navbarNav">
-          <div className="navbar-nav ml-auto">
+          <div className="navbar-nav mr-auto"> {/* Utilisation de mr-auto pour aligner à gauche */}
+            <li className="nav-item">
+              <a className="nav-link" href="/about">
+                About
+              </a>
+            </li>
+            <li className="nav-item">
+              <a className="nav-link" href="/contact">
+                Contact
+              </a>
+            </li>
+          </div>
+          <div className="navbar-nav"> {/* Aucune classe ajoutée pour aligner à droite */}
             {currentUser ? (
               <div class="dropdown">
                 <button
                   className="btn btn-secondary dropdown-toggle"
                   type="button"
-
                   id="dropdownMenuButton"
                   data-toggle="dropdown"
                   aria-haspopup="true"
                   aria-expanded="false"
                 >
-                  <i style={{color:'white'}} className="fa fa-user" aria-hidden="true"></i> {currentUser.name}
+                  <i style={{ color: "white" }} className="fa fa-user" aria-hidden="true"></i>{" "}
+                  {currentUser.name}
                 </button>
-                <div
-                  className="dropdown-menu"
-                  aria-labelledby="dropdownMenuButton"
-                >
+                <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
                   <a className="dropdown-item" href="/profile">
                     Profile
                   </a>
                   <a className="dropdown-item" href="/orders">
                     Orders
                   </a>
-                  <li className="dropdown-item" onClick={()=>{dispatch(logoutUser())}}>
+                  <li className="dropdown-item" onClick={() => { dispatch(logoutUser()) }}>
                     Logout <i class="fas fa-sign-out-alt"></i>
                   </li>
                 </div>
@@ -67,7 +74,6 @@ export default function Navbar() {
                 </a>
               </li>
             )}
-
             <li className="nav-item">
               <a className="nav-link" href="/cart">
                 <i class="fas fa-shopping-cart"></i> {cartItems.length}
